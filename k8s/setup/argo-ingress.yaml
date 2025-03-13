@@ -12,10 +12,10 @@ spec:
   ingressClassName: nginx
   tls:
   - hosts:
-    - argocd.<SEU_DOMINIO>
-    secretName: argocd-server-tls
+      - app.127.0.0.1.nip.io
+    secretName: podname-tls
   rules:
-  - host: argocd.<SEU_DOMINIO>
+  - host: app.127.0.0.1.nip.io 
     http:
       paths:
       - path: /
