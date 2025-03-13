@@ -54,7 +54,10 @@ jobs:
       - name: Update deployment file
         run: |
           NEW_IMAGE="${{ secrets.DOCKERHUB_USERNAME }}/${{ secrets.IMAGE_NAME }}:${{ needs.build.outputs.image_tag }}"
-          sed -i "s|image: .*|image: ${NEW_IMAGE}|" k8s/app/deployment.yaml
+          echo "Updating image to: $NEW_IMAGE"
+          sed -i "s|image: .*/.*|image: ${NEW_IMAGE}|" k8s/app/deployment.yaml
+          echo "Updated deployment.yaml:"
+          cat k8s/app/deployment.yaml
 
       - name: Auto Commit
         uses: stefanzweifel/git-auto-commit-action@v4
