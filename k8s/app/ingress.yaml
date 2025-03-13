@@ -12,8 +12,7 @@ spec:
       - app.127.0.0.1.nip.io
     secretName: podname-tls
   rules:
-  - host: app.127.0.0.1.nip.io
-    http:
+   - http:
       paths:
       - path: /
         pathType: Prefix
