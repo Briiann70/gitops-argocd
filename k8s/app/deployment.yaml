@@ -16,6 +16,6 @@ spec:
     spec:
       containers:
       - name: podname
-        image: /:v5
+        image: /:v6
         ports:
         - containerPort: 8080
