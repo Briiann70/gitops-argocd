@@ -1,5 +1,4 @@
 name: Build and Deploy
-
 on:
   push:
     paths:
@@ -34,16 +33,16 @@ jobs:
 
       - name: Generate Image Tag
         id: image_tag
-        run: echo "tag=v${{ github.run_number }}" >> $GITHUB_ENV
+        run: echo "tag=v${{ github.run_number }}" >> $GITHUB_OUTPUT
 
-      - name: Build and push Docker image
+      - name: Build and push
         uses: docker/build-push-action@v4
         with:
           context: ./app
           push: true
           tags: |
             ${{ secrets.DOCKERHUB_USERNAME }}/${{ secrets.IMAGE_NAME }}:latest
-            ${{ secrets.DOCKERHUB_USERNAME }}/${{ secrets.IMAGE_NAME }}:${{ env.tag }}
+            ${{ secrets.DOCKERHUB_USERNAME }}/${{ secrets.IMAGE_NAME }}:${{ steps.image_tag.outputs.tag }}
 
   deploy:
     needs: build
@@ -51,23 +50,14 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
-        with:
-          fetch-depth: 0  # Pastikan kita mendapatkan seluruh riwayat commit
-
-      - name: Pull latest changes
-        run: |
-          git config --global user.email "github-actions[bot]@users.noreply.github.com"
-          git config --global user.name "github-actions[bot]"
-          git pull --rebase origin main
 
       - name: Update deployment file
         run: |
           NEW_IMAGE="${{ secrets.DOCKERHUB_USERNAME }}/${{ secrets.IMAGE_NAME }}:${{ needs.build.outputs.image_tag }}"
           sed -i "s|image: .*/podname:.*|image: ${NEW_IMAGE}|" k8s/app/deployment.yaml
 
-      - name: Auto Commit and Push
-        uses: stefanzweifel/git-auto-commit-action@v4
+      - name: Auto Commit
+        uses: briiann70/git-auto-commit-action@v4
         with:
           commit_message: "chore: update image tag to ${{ needs.build.outputs.image_tag }}"
           file_pattern: 'k8s/app/deployment.yaml'
-          push_options: '--force'  
