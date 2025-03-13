@@ -47,6 +47,7 @@ jobs:
   deploy:
     needs: build
     runs-on: ubuntu-latest
+    environment: docker-hub
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
