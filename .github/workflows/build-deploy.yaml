@@ -51,16 +51,23 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
+        with:
+          fetch-depth: 0  # Pastikan kita mendapatkan seluruh riwayat commit
 
-      - name: Update deployment.yaml with new image
+      - name: Pull latest changes
         run: |
-          IMAGE_TAG="${{ env.tag }}"
-          NEW_IMAGE="${{ secrets.DOCKERHUB_USERNAME }}/${{ secrets.IMAGE_NAME }}:$IMAGE_TAG"
-          sed -i "s|image: .*$|image: ${NEW_IMAGE}|" k8s/app/deployment.yaml
+          git config --global user.email "github-actions[bot]@users.noreply.github.com"
+          git config --global user.name "github-actions[bot]"
+          git pull --rebase origin main
 
-      - name: Commit and push changes
+      - name: Update deployment file
+        run: |
+          NEW_IMAGE="${{ secrets.DOCKERHUB_USERNAME }}/${{ secrets.IMAGE_NAME }}:${{ needs.build.outputs.image_tag }}"
+          sed -i "s|image: .*/podname:.*|image: ${NEW_IMAGE}|" k8s/app/deployment.yaml
+
+      - name: Auto Commit and Push
         uses: stefanzweifel/git-auto-commit-action@v4
         with:
-          commit_message: "chore: update image tag to ${{ env.tag }}"
+          commit_message: "chore: update image tag to ${{ needs.build.outputs.image_tag }}"
           file_pattern: 'k8s/app/deployment.yaml'
-          push_options: '--force'
+          push_options: '--force'  
