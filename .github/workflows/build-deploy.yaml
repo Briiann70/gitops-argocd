@@ -51,12 +51,17 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v3
 
+      - name: Debug Secrets
+        run: |
+          echo "DOCKERHUB_USERNAME=${{ secrets.DOCKERHUB_USERNAME }}"
+          echo "IMAGE_NAME=${{ secrets.IMAGE_NAME }}"
+          echo "IMAGE_TAG=${{ needs.build.outputs.image_tag }}"
+
       - name: Update deployment file
         run: |
           NEW_IMAGE="${{ secrets.DOCKERHUB_USERNAME }}/${{ secrets.IMAGE_NAME }}:${{ needs.build.outputs.image_tag }}"
           echo "Updating image to: $NEW_IMAGE"
-          sed -i "s|image: .*/.*|image: ${NEW_IMAGE}|" k8s/app/deployment.yaml
-          echo "Updated deployment.yaml:"
+          sed -i "s|image: .*|image: ${NEW_IMAGE}|" k8s/app/deployment.yaml
           cat k8s/app/deployment.yaml
 
       - name: Auto Commit
