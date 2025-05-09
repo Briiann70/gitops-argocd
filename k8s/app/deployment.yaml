@@ -16,6 +16,6 @@ spec:
     spec:
       containers:
       - name: podname
-        image: briiann70/simple-app:v9
+        image: briiann70/simple-app:v10
         ports:
         - containerPort: 8080
